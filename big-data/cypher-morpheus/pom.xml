@@ -1,0 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.unict.BigData</groupId>
+  <artifactId>my-app</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>my-app</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_2.12</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql -->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_2.12</artifactId>
+      <version>3.0.3</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+      <version>2.12.8</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.scala-lang/scala-compiler -->
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-compiler</artifactId>
+      <version>2.12.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencypher</groupId>
+      <artifactId>okapi-relational</artifactId>
+      <version>0.4.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencypher</groupId>
+      <artifactId>okapi-relational</artifactId>
+      <version>0.4.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencypher</groupId>
+      <artifactId>okapi-ir</artifactId>
+      <version>0.4.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>  
+      <version>3.7</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.atnos/eff -->
+    <dependency>
+      <groupId>org.atnos</groupId>
+      <artifactId>eff_2.12</artifactId>
+      <version>5.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-tools</groupId>
+      <artifactId>maven-scala-plugin</artifactId>
+      <version>2.11</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j -->
+    <dependency>
+      <groupId>org.neo4j</groupId>
+      <artifactId>neo4j</artifactId>
+      <version>4.3.2</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j-cypher -->
+    <dependency>
+      <groupId>org.neo4j</groupId>
+      <artifactId>neo4j-cypher</artifactId>
+      <version>4.3.2</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.opencypher/spark-cypher -->
+    <dependency>
+      <groupId>org.opencypher</groupId>
+      <artifactId>spark-cypher</artifactId>
+      <version>1.0.0-beta7</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.opencypher/morpheus-spark-cypher -->
+    <dependency>
+      <groupId>org.opencypher</groupId>
+      <artifactId>morpheus-spark-cypher</artifactId>
+      <version>0.4.2</version>
+   </dependency>
+  </dependencies>
+  <build>
+     <plugins>
+          <plugin>
+               <groupId>org.scala-tools</groupId>
+               <artifactId>maven-scala-plugin</artifactId>
+               <executions>
+                    <execution>
+                         <goals>
+                             <goal>compile</goal>
+                             <goal>testCompile</goal>
+                          </goals>
+                    </execution>
+               </executions>
+          </plugin>
+     </plugins>
+  </build>
+</project>

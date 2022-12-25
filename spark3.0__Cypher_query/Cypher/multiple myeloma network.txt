@@ -1,0 +1,47 @@
+Rete multiple myeloma:
+ - https://www.dropbox.com/sh/dbjglnydl7ou7ks/AACe8pkRdubgw0WzOerszuoGa?dl=0
+
+query:
+ - Relationships among multiple myeloma disease and generic drugs
+   MATCH (dis:disease {names:"multiple myeloma"})-[r:BIO_VALUE_HIGH]->(drg:drug)
+   RETURN dis, r, drg LIMIT 10;
+
+ - Relationships among a disease which name starts with "my"
+   MATCH p=(dis:disease)-[:BIO_VALUE_HIGH]->(gen:gene)
+   WHERE dis.names =~ '(?i)my.*'
+   RETURN p LIMIT 10;
+
+ - Relationships among a disease which name contains "io" and several genes
+   MATCH p=(dis:disease)-[:BIO_VALUE_HIGH]->(gen:gene)
+   WHERE dis.names CONTAINS 'io' 
+   RETURN p LIMIT 10;
+ 
+ - Relationships among diseases and drugs where the names are into two vectors (diseases and drugs)
+   WITH ["multiple myeloma"] AS diseases, ["ixazomib", "auranofin"] AS drugs
+   MATCH (dis:disease)<-[r:BIO_VALUE_HIGH]-(drg:drug)
+   WHERE toLower(dis.names) IN diseases AND
+         toLower(drg.names) IN drugs
+   RETURN dis, r, drg;
+
+ - Path of min length "1" and max one "3" amoug multiple myeloma disease and genes/proteins
+   MATCH p=(dis:disease {names:"multiple myeloma"})-[:BIO_VALUE_HIGH *1..3]->(gp:`gene:protein`)
+   RETURN p LIMIT 10
+
+ - Diseases and Drugs triangulation
+   MATCH  p=(dis1:disease {names:"multiple myeloma"})-[:BIO_VALUE_HIGH *1..3]->(drg1:drug),
+       q=(dis1)-[:BIO_VALUE_HIGH *1..2]->(dis2:disease),
+       r=(dis2)-[:BIO_VALUE_HIGH *1..3]->(drg2:drug),
+       t=(drg2)-[:BIO_VALUE_HIGH *2..3]->(drg1)
+   RETURN p,q,r,t LIMIT 1;
+
+ - Shortest Path
+   MATCH (dis:disease {names:"multiple myeloma"}), (gen:gene {names: "PARTICL"}),
+       p= shortestPath((dis)-[:BIO_VALUE_HIGH *]->(gen))
+   RETURN p;
+
+ - Query concatenation
+   MATCH (dis1:disease)<-[r1:BIO_VALUE_HIGH]-(gen1:gene)<-[r2:BIO_VALUE_HIGH]-(gen2:gene)<-[r3:BIO_VALUE_HIGH]-(dis1)
+   WHERE gen1.names <> gen2.names
+   WITH dis1,r1,gen1,r2,gen2,r3 LIMIT 5
+   MATCH (gen1)-[r4:BIO_VALUE_HIGH]-(drg:drug)-[r5:BIO_VALUE_HIGH]-(gen2)
+   RETURN dis1,r1,gen1,r2,gen2,r3,drg,r4,r5

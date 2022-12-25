@@ -1,0 +1,154 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2580
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+\
+\
+\
+\
+************************************************************************************************\
+PROBLEMI D\'92INCOMPATIBILIT\'e0 CON SPARK 3.1.2\
+************************************************************************************************\
+\
+\
+\
+\
+\
+\
+package edu.unict.BigData\
+\
+import org.apache.spark.\{SparkConf,SparkContext\}\
+import scala.math.random\
+import org.apache.spark.SparkContext._\
+import org.apache.spark.sql.\{SparkSession, DataFrame\}\
+\
+\
+import org.opencypher.morpheus.api.MorpheusSession\
+import org.opencypher.okapi.api.io.conversion.\{NodeMappingBuilder, RelationshipMappingBuilder\}\
+import org.opencypher.okapi.api.value.CypherValue\
+import org.opencypher.morpheus.api.io.\{MorpheusNodeTable, MorpheusRelationshipTable, MorpheusElementTable\}\
+\
+object App \{\
+    def main(args: Array[String]): Unit = \{\
+       val spark = SparkSession\
+                   .builder()\
+                   .appName( name = "meyloma")\
+                   .config("spark.master","local[*]")\
+                   .getOrCreate()\
+\
+      /* val nodeData: DataFrame = spark\
+                 .createDataFrame(Seq((0,"Alice", true), (1,"Bob", true)))\
+                 .toDF(CypherSession.ID_COLUMN, "name", ":Person")\
+       val relationshipData: DataFrame = spark\
+                .createDataFrame(Seq((0,0,1,true)))\
+                .toDF(CypherSession.ID_COLUMN,CypherSession.SOURCE_ID_COLUMN, CypherSession.TARGET_ID_COLUMN, ":KNOWS")\
+\
+\
+       val cypherSession = SparkCypherSession.create(spark)\
+\
+       val graph: PropertyGraph = cypherSession.createGraph(nodeData,relationshipData)          \
+\
+       val result: CypherResult = graph.cypher(\
+        """\
+          |MATCH (a:Person)-[r:KNOWS]->(:Person)\
+          |RETURN a, r\
+        """.stripMargin)\
+\
+       result.df.show()\
+\
+\
+\
+/*2 SOLUTION*/\
+\
+       implicit val morpheus: MorpheusSession = MorpheusSession.create(spark)\
+\
+       val csvOptions = Map("header"->"true", "delimiter" -> ",", "inferSchema" -> "true")\
+\
+\
+       val moviesDF = spark.read.options(csvOptions).csv("movies.csv")\
+       val personsDF = spark.read.options(csvOptions).csv("persons.csv")\
+       val actedInDF = spark.read.options(csvOptions).csv("acted_in.csv")\
+\
+       val movieNodeMapping = NodeMappingBuilder\
+           .withSourceIdKey("id:Int")\
+           .withImpliedLabel("Movies")\
+           .withPropertyKey(propertyKey = "title", sourcePropertyKey = "title")\
+           .withPropertyKey(propertyKey = "tagline", sourcePropertyKey = "tagline")\
+           .withPropertyKey(propertyKey = "summary", sourcePropertyKey = "summary")\
+           .withPropertyKey(propertyKey = "poster_image", sourcePropertyKey = "poster_image")\
+           .withPropertyKey(propertyKey = "duration", sourcePropertyKey = "duration")\
+           .withPropertyKey(propertyKey = "rated", sourcePropertyKey = "rated")\
+           .build\
+\
+       val personNodeMapping = NodeMappingBuilder\
+           .withSourceIdKey("id:Int")\
+           .withImpliedLabel("Person")\
+           .withPropertyKey("name", "name")\
+           .withPropertyKey("born", "born")\
+           .withPropertyKey("poster_image", "poster_image")\
+           .build\
+\
+       val actedInRelationMapping = RelationshipMappingBuilder\
+           .withSourceIdKey("rel_id:Int")\
+           .withSourceStartNodeKey("START_ID")\
+           .withSourceEndNodeKey("END_ID")\
+           .withRelType("ACTED_IN")\
+           .withPropertyKey("role", "role")\
+           .build\
+\
+       val moviesNode = MorpheusElementTable.create(movieNodeMapping, moviesDF)\
+       val personsNode = MorpheusElementTable.create(personNodeMapping, personsDF)\
+       val actedInRelation = MorpheusElementTable.create(actedInRelationMapping, actedInDF)\
+\
+       val actorMovieGraph = morpheus.readFrom(personsNode,moviesNode,actedInRelation)\
+\
+\
+       val actors = actorMovieGraph.cypher(\
+           "MATCH (p:Person) return p.name AS Actor_Name"\
+       )\
+       actors.records.show  */\
+\
+\
+\
+/*3 SOLUTION*/\
+\
+      implicit val morpheus: MorpheusSession = MorpheusSession.local()\
+      import spark.sqlContext.implicits._\
+\
+      // 2) Generate some DataFrames that we'd like to interpret as a property graph.\
+      val nodesDF = spark.createDataset(Seq(\
+        (0L, "Alice", 42L),\
+        (1L, "Bob", 23L),\
+        (2L, "Eve", 84L)\
+      )).toDF("id", "name", "age")\
+      val relsDF = spark.createDataset(Seq(\
+        (0L, 0L, 1L, "23/01/1987"),\
+        (1L, 1L, 2L, "12/12/2009")\
+      )).toDF("id", "source", "target", "since")\
+\
+      // 3) Generate node- and relationship tables that wrap the DataFrames. The mapping between graph elements and columns\
+      //    is derived using naming conventions for identifier columns.\
+      val personTable = MorpheusNodeTable(Set("Person"), nodesDF)\
+      val friendsTable = MorpheusRelationshipTable("KNOWS", relsDF)\
+\
+      // 4) Create property graph from graph scans\
+      val graph = morpheus.readFrom(personTable, friendsTable)\
+\
+      // 5) Execute Cypher query and print results\
+      val result = graph.cypher("MATCH (n:Person) RETURN n.name")\
+\
+      // 6) Collect results into string by selecting a specific column.\
+      //    This operation may be very expensive as it materializes results locally.\
+      val names: Set[String] = result.records.table.df.collect().map(_.getAs[String]("n_name")).toSet\
+\
+      println(names)\
+\
+       spark.stop()\
+    \}\
+\}\
+\
+}
